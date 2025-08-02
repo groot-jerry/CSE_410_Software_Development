@@ -57,7 +57,7 @@ def login_view(request):
 from django.contrib.auth.decorators import login_required
 from .forms import TechnicianProfileForm
 from .models import TechnicianProfile, utechnicianProfile
-
+from products.models import Product
 
 @login_required
 def update_profile(request):
@@ -77,8 +77,15 @@ def update_profile(request):
     return render(request, 'update_profile.html', {'form': form})
 
 
+@login_required  # শুধুমাত্র লগইন ইউজারই অ্যাক্সেস পাবে
 def admin(request):
-    return render(request, 'admin.html')
+    product_count = Product.objects.count()
+    technician_count = TechnicianProfile.objects.count()
+    context = {
+        'product_count': product_count,
+        'technician_count': technician_count,
+    }
+    return render(request, 'admin.html', context)
 
 
 def customer(request):
@@ -157,4 +164,44 @@ def view_technician_profile(request):
 #         'technician_id': technician_id,
 #     }
 #     return render(request, 'view_utechnician_profile.html', context)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from products.forms import ProductForm
+from products.models import Product
+
+@login_required
+def product_list(request):
+    products = Product.objects.all()
+    return render(request, 'product_list.html', {'products': products})
+
+@login_required
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('adminpanel:product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'product_form.html', {'form': form})
+
+@login_required
+def product_edit(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('adminpanel:product_list')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'product_form.html', {'form': form})
+
+@login_required
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        product.delete()
+        return redirect('adminpanel:product_list')
+    return render(request, 'product_confirm_delete.html', {'product': product})
 

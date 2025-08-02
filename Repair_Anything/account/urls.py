@@ -18,7 +18,7 @@ urlpatterns = [
     path('view_utechnician_profile/<str:id>/', view_utechnician_profile, name='utechnician_profile'),
     path('view_technician_profile/', view_technician_profile, name='technician_profile'),
     path('update_profile/', update_profile, name='update_profile'),
+    path('adminpanel/', views.admin, name='adminpanel'),
     path('logout/', views.logout_view, name='logout_view'),
-
+    path('adminpanel/products/', views.product_list, name='product_list'),
 ]
-
